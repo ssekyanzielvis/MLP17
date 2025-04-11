@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECG Psychological State Detection</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Fallback inline styles in case CSS fails to load -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            margin-top: 20px;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="card shadow-lg">
+            <div class="card-header bg-primary text-white">
+                <h1 class="text-center mb-0">ECG Psychological State Detection</h1>
+            </div>
+            
+            <div class="card-body">
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+                
+                <form method="POST" action="{{ url_for('analyze') }}" enctype="multipart/form-data" class="mb-4" id="uploadForm">
+                    <div class="mb-3">
+                        <label for="ecgFile" class="form-label">Upload ECG Data (CSV/TXT)</label>
+                        <input class="form-control" type="file" id="ecgFile" name="file" accept=".csv,.txt" required>
+                        <small class="form-text text-muted">Maximum file size: 100 MB. CSV must contain one of the following pairs: MLII and V5, MLII and V1, MLII and V2, or V5 and V2 (or alternatives like LeadII, LeadV5, LeadV1, LeadV2).</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Analyze ECG</button>
+                </form>
+                
+                {% if filename %}
+                    <div class="alert alert-info">
+                        <strong>File analyzed:</strong> {{ filename }}<br>
+                        <strong>Timestamp:</strong> {{ timestamp }}<br>
+                        <strong>Leads used:</strong> {{ leads_used }}
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card h-100 border-{{ stress.color }}">
+                                <div class="card-header bg-{{ stress.color }} text-white">
+                                    <h5 class="mb-0">Stress Level</h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <h2 class="display-4">{{ stress.level }}</h2>
+                                    <p class="mb-0">Score: {{ stress.value }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card h-100 border-{{ anxiety.color }}">
+                                <div class="card-header bg-{{ anxiety.color }} text-white">
+                                    <h5 class="mb-0">Anxiety Level</h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <h2 class="display-4">{{ anxiety.level }}</h2>
+                                    <p class="mb-0">Score: {{ anxiety.value }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card h-100 border-{{ depression.color }}">
+                                <div class="card-header bg-{{ depression.color }} text-white">
+                                    <h5 class="mb-0">Depression Level</h5>
+                                </div>
+                                <div class="card-body text-center">
+                                    <h2 class="display-4">{{ depression.level }}</h2>
+                                    <p class="mb-0">Score: {{ depression.value }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0">ECG Visualization</h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="{{ ecg_plot }}" alt="ECG Plot" class="img-fluid">
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="card-footer text-muted text-center">
+                Psychological State Detection System © {{ now.year }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Client-side file size validation -->
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            const fileInput = document.getElementById('ecgFile');
+            const maxSize = 100 * 1024 * 1024; // 100 MB in bytes
+            if (fileInput.files.length > 0) {
+                const fileSize = fileInput.files[0].size;
+                if (fileSize > maxSize) {
+                    event.preventDefault();
+                    alert('File too large! Maximum allowed size is 100 MB.');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
